@@ -1,0 +1,2 @@
+# Ollama Function call sample
+
