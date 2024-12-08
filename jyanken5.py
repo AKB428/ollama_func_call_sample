@@ -64,13 +64,31 @@ messages = []
 
 # ループでコンソール入力を受け付ける
 while True:
-    user_input = input("入力してください（終了するには 'exit' と入力）：")
-    if user_input.lower() == 'exit':
-        print("終了します。")
-        break
+    print('入力してください。複数行の場合は """ で囲んでください（終了するには "exit" と入力）：')
+    user_input = ""
+    is_multiline = False
+    while True:
+        line = input()
+        if line.strip() == '"""':
+            if is_multiline:
+                break
+            else:
+                is_multiline = True
+                continue
+        if not is_multiline and line.lower() == 'exit':
+            print("終了します。")
+            exit()
+        if not is_multiline:
+            user_input = line.strip()
+            break
+        user_input += line + "\n"
+
+    if not is_multiline and user_input.strip() == "":
+        print("無効な入力です。もう一度入力してください。")
+        continue
 
     # ユーザー入力を会話履歴に追加
-    messages.append({'role': 'user', 'content': user_input})
+    messages.append({'role': 'user', 'content': user_input.strip()})
 
     response: ChatResponse = chat(
         'llama3.1',
@@ -93,7 +111,7 @@ while True:
         # モデルに結果を渡して最終応答を得る
         messages.append({'role': 'tool', 'content': str(output), 'name': tool.function.name})
 
-        final_response = chat('llama3.1', messages=messages)
+        final_response = chat('llama3.3:70b-instruct-q2_K', messages=messages)
         print('Final response:', final_response.message.content)
 
         # モデルの応答を履歴に追加
